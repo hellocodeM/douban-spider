@@ -11,7 +11,7 @@ var taskQ = [];
 /**
  * desc: request an URL, pass the data by invoke function cb, then put the nextpage URL into the taskQ
  */
-var fetch = function (options, cb) {
+var fetch = function (options, cb, next) {
 	var url = "";
 	var id = options.id;
 	if (! options.url && options.id) {
@@ -59,13 +59,15 @@ var fetch = function (options, cb) {
 					});
 				} 
 			}
+			if (next)
+				next();
 		} else {
 			log.error(err);
 		}
 	});
 }
 
-exports.start = function(options, cb) {
+exports.start = function(options, cb, next) {
 	var interval = options.interval || 5000;
 	taskQ = taskQ.concat(options.IDs);
 
@@ -74,11 +76,12 @@ exports.start = function(options, cb) {
 			fetch(taskQ.pop(), cb);
 		} else {
 			clearInterval(intervalID);
+			next();
 		}
 	}, interval);	
 }
 
-exports.boot = function (options, cb, next) {
+exports.boot = function (options, next) {
 	// configuration
 	var pageLimit = options.pageLimit || 200;
 	var tag = options.tag || "热门";
@@ -98,8 +101,7 @@ exports.boot = function (options, cb, next) {
 	var intervalID = setInterval(function() {
 		if (pageStart > sum) {
 			clearInterval(intervalID);
-			cb(data);
-			next();
+			next(data);
 		}
 		var curURL = originURL + "&page_start=" + pageStart;
 		log.info("fetchind: " + curURL);
@@ -130,4 +132,11 @@ function Logger(baseURI) {
 		index++;
 	}
 	return URL;
+}
+
+exports.save = function (data) {
+	fs.appendFile("data/data.csv", data, "utf-8", function(err) {
+		if (err)
+			log.error(err);
+	});
 }
