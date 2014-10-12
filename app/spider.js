@@ -59,8 +59,6 @@ var fetch = function (options, cb) {
 					});
 				} 
 			}
-		} else if (res.statusCode != 200) {
-			log.error("status error: %d", res.statusCode);
 		} else {
 			log.error(err);
 		}
@@ -126,9 +124,10 @@ exports.boot = function (options, cb, next) {
 
 function Logger(baseURI) {
 	var index = 1;
-	while (fs.existsSync(baseURI)) {
-		baseURI += index;
+	var URL = baseURI;
+	while (fs.existsSync(URL)) {
+		URL = baseURI + index;
 		index++;
 	}
-	return baseURI;
+	return URL;
 }

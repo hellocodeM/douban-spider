@@ -4,7 +4,8 @@
   "description": "## description  Fetch douban movie data.",
   "main": "app/index.js",
   "dependencies": {
-    "request": "^2.45.0"
+    "request": "^2.45.0",
+	"cheerio": "0.17.0"
   },
   "devDependencies": {},
   "scripts": {
