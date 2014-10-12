@@ -4,9 +4,9 @@ var Log = require("log"),
 	log = new Log("info", fs.createWriteStream('log/bootstrap.log'));
 
 var config = {
-	tag: "爱情",
+	tag: "喜剧",
 	interval: 2000,
-	sum: 1000,
+	sum: 2000,
 	pageLimit: 100
 };
 

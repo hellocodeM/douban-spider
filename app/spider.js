@@ -3,7 +3,7 @@ var cheerio = require("cheerio");
 var colors = require("colors");
 var fs = require("fs");
 var Log = require("log"),
-	log = new Log('info', fs.createWriteStream('log/spider.log'));
+	log = new Log('info', fs.createWriteStream(Logger("log/spider.log")));
 
 // task queue
 var taskQ = [];
@@ -50,10 +50,14 @@ var fetch = function (options, cb) {
 
 			var nextpage = $(".article #collections_tab .paginator .next a").attr('href');
 			if (nextpage != undefined)  {
-				taskQ.push({
-					url: nextpage,
-					id: nextpage.split("/")[4]
-				});
+				var start = nextpage.slice(nextpage.indexOf('=') + 1);
+				start = parseInt(start);
+				if (start <= 180) {
+					taskQ.push({
+						url: nextpage,
+						id: nextpage.split("/")[4]
+					});
+				} 
 			}
 		} else if (res.statusCode != 200) {
 			log.error("status error: %d", res.statusCode);
@@ -111,11 +115,20 @@ exports.boot = function (options, cb, next) {
 					});
 				}
 			} else if (res.statusCode != 200) {
-				log.error("status error%s", statusCode);
+				log.error("status error%s", res.statusCode);
 			} else {
 				log.error(err);
 			}
 		});
 		pageStart += pageLimit;
 	}, interval);
+}
+
+function Logger(baseURI) {
+	var index = 1;
+	while (fs.existsSync(baseURI)) {
+		baseURI += index;
+		index++;
+	}
+	return baseURI;
 }
