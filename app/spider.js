@@ -11,7 +11,7 @@ var taskQ = [];
 /**
  * desc: request an URL, pass the data by invoke function cb, then put the nextpage URL into the taskQ
  */
-var fetch = function (options, cb, next) {
+var fetch = function (options, cb) {
 	var url = "";
 	var id = options.id;
 	if (! options.url && options.id) {
@@ -59,8 +59,6 @@ var fetch = function (options, cb, next) {
 					});
 				} 
 			}
-			if (next)
-				next();
 		} else {
 			log.error(err);
 		}
@@ -76,7 +74,8 @@ exports.start = function(options, cb, next) {
 			fetch(taskQ.pop(), cb);
 		} else {
 			clearInterval(intervalID);
-			next();
+			if (next)
+				next();
 		}
 	}, interval);	
 }
