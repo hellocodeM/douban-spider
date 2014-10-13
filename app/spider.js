@@ -9,7 +9,7 @@ var Log = require("log"),
 var taskQ = [];
 
 /**
- * desc: request an URL, pass the data by invoke function cb, then put the nextpage URL into the taskQ
+ * desc: get information from an URL or a movie id, the cb will be invoked with the movie "mid, uid, score" array as the callback.
  */
 var fetch = function (options, cb) {
 	var url = "";
@@ -65,6 +65,10 @@ var fetch = function (options, cb) {
 	});
 }
 
+/**
+ * start the fetch infomation from URL precudure
+ */
+
 exports.start = function(options, cb, next) {
 	var interval = options.interval || 5000;
 	taskQ = taskQ.concat(options.IDs);
@@ -75,11 +79,14 @@ exports.start = function(options, cb, next) {
 		} else {
 			clearInterval(intervalID);
 			if (next)
-				next();
+				next(null);
 		}
 	}, interval);	
 }
 
+/** bootstrap: get movie ids from search page.
+ *	when bootstrap precudure finished, call the "next" function
+ */
 exports.boot = function (options, next) {
 	// configuration
 	var pageLimit = options.pageLimit || 200;
@@ -100,7 +107,7 @@ exports.boot = function (options, next) {
 	var intervalID = setInterval(function() {
 		if (pageStart > sum) {
 			clearInterval(intervalID);
-			next(data);
+			next(null, data);
 		}
 		var curURL = originURL + "&page_start=" + pageStart;
 		log.info("fetchind: " + curURL);
@@ -109,12 +116,9 @@ exports.boot = function (options, next) {
 				var sub = JSON.parse(body).subjects;
 				for (var i in sub) {
 					data.push({
-						title: sub[i].title,
 						id: sub[i].id
 					});
 				}
-			} else if (res.statusCode != 200) {
-				log.error("status error%s", res.statusCode);
 			} else {
 				log.error(err);
 			}
